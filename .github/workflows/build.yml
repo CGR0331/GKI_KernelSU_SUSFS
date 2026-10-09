@@ -629,16 +629,20 @@ jobs:
           else
             echo "KSU_LATEST_COMMIT_DATE=未知" >> $GITHUB_ENV
           fi
-          # ======= 强制修改内核版本号为 40968-5 =======
+          # ======= 强制修改内核版本号为 40901-2 =======
           if [ -d "KernelSU" ]; then
-            echo "正在强制修改 KSU 主版本号为 40968，UAPI 版本号为 5..."
-            find KernelSU -name "Makefile" -exec sed -i 's/\$(eval KSU_VERSION=.*)/$(eval KSU_VERSION=40968)/g' {} +
-            find KernelSU -name "supercall.h" -exec sed -i 's/KERNEL_SU_UAPI_VERSION, 2/KERNEL_SU_UAPI_VERSION, 5/g' {} +
-            echo "修改后的主版本号："
-            grep -r "KSU_VERSION=" KernelSU/kernel/Makefile || true
-            echo "修改后的 UAPI 版本号："
-            grep -r "KERNEL_SU_UAPI_VERSION" KernelSU --include="supercall.h" || true
+          echo "正在强制修改 KSU 主版本号为 40901，UAPI 版本号为 2..."
+          # 1. 强制修改 Makefile 中的 KSU_VERSION 主版本号为 40901
+          find KernelSU -name "Makefile" -exec sed -i 's/\$(eval KSU_VERSION=.*)/$(eval KSU_VERSION=40901)/g' {} +
+          # 2. 强制修改 supercall.h 中的 UAPI 版本号为 2（这样后缀会变成 -2）
+          find KernelSU -name "supercall.h" -exec sed -i 's/KERNEL_SU_UAPI_VERSION, [0-9]*/KERNEL_SU_UAPI_VERSION, 2/g' {} +
+          # 3. 打印确认
+          echo "修改后的主版本号："
+          grep -r "KSU_VERSION=" KernelSU/kernel/Makefile || true
+          echo "修改后的 UAPI 版本号："
+          grep -r "KERNEL_SU_UAPI_VERSION" KernelSU --include="supercall.h" || true
           fi
+# ========================================= 
 
       - name: 配置 SukiSU 管理器信息
         if: (inputs.ksu_variant == 'SukiSU' || inputs.ksu_variant == 'SukiSU(40726)' || inputs.ksu_variant == 'SukiSU(40548)') && inputs.ksu_mode != '禁用KSU'
